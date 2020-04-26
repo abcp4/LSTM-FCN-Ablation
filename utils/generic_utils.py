@@ -30,47 +30,51 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
         A tuple of shape (X_train, y_train, X_test, y_test, is_timeseries).
         For legacy reasons, is_timeseries is always True.
     """
-    assert index < len(TRAIN_FILES), "Index invalid. Could not load dataset at %d" % index
-    if verbose:
-        print("Loading train / test dataset : ", TRAIN_FILES[index], TEST_FILES[index])
+    if(index<128):
+        assert index < len(TRAIN_FILES), "Index invalid. Could not load dataset at %d" % index
+        if verbose:
+            print("Loading train / test dataset : ", TRAIN_FILES[index], TEST_FILES[index])
 
-    if os.path.exists(TRAIN_FILES[index]):
-        df = pd.read_csv(TRAIN_FILES[index], header=None, encoding='latin-1')
+        if os.path.exists(TRAIN_FILES[index]):
+            df = pd.read_csv(TRAIN_FILES[index], header=None, encoding='latin-1')
 
-    elif os.path.exists(TRAIN_FILES[index][1:]):
-        df = pd.read_csv(TRAIN_FILES[index][1:], header=None, encoding='latin-1')
+        elif os.path.exists(TRAIN_FILES[index][1:]):
+            df = pd.read_csv(TRAIN_FILES[index][1:], header=None, encoding='latin-1')
 
+        else:
+            raise FileNotFoundError('File %s not found!' % (TRAIN_FILES[index]))
+
+        is_timeseries = True  # assume all input data is univariate time series
+
+        # remove all columns which are completely empty
+        df.dropna(axis=1, how='all', inplace=True)
+
+        if not is_timeseries:
+            data_idx = df.columns[1:]
+            min_val = min(df.loc[:, data_idx].min())
+            if min_val == 0:
+                df.loc[:, data_idx] += 1
+
+        # fill all missing columns with 0
+        df.fillna(0, inplace=True)
+
+        # cast all data into integer (int32)
+        if not is_timeseries:
+            df[df.columns] = df[df.columns].astype(np.int32)
+
+        # extract labels Y and normalize to [0 - (MAX - 1)] range
+        y_train = df[[0]].values
+        nb_classes = len(np.unique(y_train))
+        y_train = (y_train - y_train.min()) / (y_train.max() - y_train.min()) * (nb_classes - 1)
+
+        # drop labels column from train set X
+        df.drop(df.columns[0], axis=1, inplace=True)
+
+        X_train = df.values
     else:
-        raise FileNotFoundError('File %s not found!' % (TRAIN_FILES[index]))
-
-    is_timeseries = True  # assume all input data is univariate time series
-
-    # remove all columns which are completely empty
-    df.dropna(axis=1, how='all', inplace=True)
-
-    if not is_timeseries:
-        data_idx = df.columns[1:]
-        min_val = min(df.loc[:, data_idx].min())
-        if min_val == 0:
-            df.loc[:, data_idx] += 1
-
-    # fill all missing columns with 0
-    df.fillna(0, inplace=True)
-
-    # cast all data into integer (int32)
-    if not is_timeseries:
-        df[df.columns] = df[df.columns].astype(np.int32)
-
-    # extract labels Y and normalize to [0 - (MAX - 1)] range
-    y_train = df[[0]].values
-    nb_classes = len(np.unique(y_train))
-    y_train = (y_train - y_train.min()) / (y_train.max() - y_train.min()) * (nb_classes - 1)
-
-    # drop labels column from train set X
-    df.drop(df.columns[0], axis=1, inplace=True)
-
-    X_train = df.values
-
+        X_train = np.load('/content/drive/My\ Drive/Geo/Tracos/X_train.npy')
+        X_test = np.load('/content/drive/My\ Drive/Geo/Tracos/X_val.npy')
+        
     if is_timeseries:
         X_train = X_train[:, np.newaxis, :]
         # scale the values
@@ -88,40 +92,41 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
                 X_train = (X_train - X_train_mean) / (X_train_std + 1e-8)
 
     if verbose: print("Finished loading train dataset..")
+    if(index<128):
 
-    if os.path.exists(TEST_FILES[index]):
-        df = pd.read_csv(TEST_FILES[index], header=None, encoding='latin-1')
+        if os.path.exists(TEST_FILES[index]):
+            df = pd.read_csv(TEST_FILES[index], header=None, encoding='latin-1')
 
-    elif os.path.exists(TEST_FILES[index][1:]):
-        df = pd.read_csv(TEST_FILES[index][1:], header=None, encoding='latin-1')
-    else:
-        raise FileNotFoundError('File %s not found!' % (TEST_FILES[index]))
+        elif os.path.exists(TEST_FILES[index][1:]):
+            df = pd.read_csv(TEST_FILES[index][1:], header=None, encoding='latin-1')
+        else:
+            raise FileNotFoundError('File %s not found!' % (TEST_FILES[index]))
 
-    # remove all columns which are completely empty
-    df.dropna(axis=1, how='all', inplace=True)
+        # remove all columns which are completely empty
+        df.dropna(axis=1, how='all', inplace=True)
 
-    if not is_timeseries:
-        data_idx = df.columns[1:]
-        min_val = min(df.loc[:, data_idx].min())
-        if min_val == 0:
-            df.loc[:, data_idx] += 1
+        if not is_timeseries:
+            data_idx = df.columns[1:]
+            min_val = min(df.loc[:, data_idx].min())
+            if min_val == 0:
+                df.loc[:, data_idx] += 1
 
-    # fill all missing columns with 0
-    df.fillna(0, inplace=True)
+        # fill all missing columns with 0
+        df.fillna(0, inplace=True)
 
-    # cast all data into integer (int32)
-    if not is_timeseries:
-        df[df.columns] = df[df.columns].astype(np.int32)
+        # cast all data into integer (int32)
+        if not is_timeseries:
+            df[df.columns] = df[df.columns].astype(np.int32)
 
-    # extract labels Y and normalize to [0 - (MAX - 1)] range
-    y_test = df[[0]].values
-    nb_classes = len(np.unique(y_test))
-    y_test = (y_test - y_test.min()) / (y_test.max() - y_test.min()) * (nb_classes - 1)
+        # extract labels Y and normalize to [0 - (MAX - 1)] range
+        y_test = df[[0]].values
+        nb_classes = len(np.unique(y_test))
+        y_test = (y_test - y_test.min()) / (y_test.max() - y_test.min()) * (nb_classes - 1)
 
-    # drop labels column from train set X
-    df.drop(df.columns[0], axis=1, inplace=True)
-
-    X_test = df.values
+        # drop labels column from train set X
+        df.drop(df.columns[0], axis=1, inplace=True)
+        X_test = df.values
+    
 
     if is_timeseries:
         X_test = X_test[:, np.newaxis, :]
