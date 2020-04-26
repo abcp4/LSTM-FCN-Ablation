@@ -77,6 +77,7 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
         X_test = np.load('/content/drive/My Drive/Geo/Tracos/X_val.npy')
         y_train = np.load('/content/drive/My Drive/Geo/Tracos/y_train.npy')
         y_test = np.load('/content/drive/My Drive/Geo/Tracos/y_val.npy')
+        nb_classes=2
         
     if is_timeseries:
         X_train = X_train[:, np.newaxis, :]
