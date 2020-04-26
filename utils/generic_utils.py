@@ -30,6 +30,8 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
         A tuple of shape (X_train, y_train, X_test, y_test, is_timeseries).
         For legacy reasons, is_timeseries is always True.
     """
+    is_timeseries = True  # assume all input data is univariate time series
+
     if(index<128):
         assert index < len(TRAIN_FILES), "Index invalid. Could not load dataset at %d" % index
         if verbose:
@@ -44,8 +46,7 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
         else:
             raise FileNotFoundError('File %s not found!' % (TRAIN_FILES[index]))
 
-        is_timeseries = True  # assume all input data is univariate time series
-
+        
         # remove all columns which are completely empty
         df.dropna(axis=1, how='all', inplace=True)
 
@@ -74,6 +75,8 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
     else:
         X_train = np.load('/content/drive/My\ Drive/Geo/Tracos/X_train.npy')
         X_test = np.load('/content/drive/My\ Drive/Geo/Tracos/X_val.npy')
+        y_train = np.load('/content/drive/My\ Drive/Geo/Tracos/y_train.npy')
+        y_test = np.load('/content/drive/My\ Drive/Geo/Tracos/y_val.npy')
         
     if is_timeseries:
         X_train = X_train[:, np.newaxis, :]
