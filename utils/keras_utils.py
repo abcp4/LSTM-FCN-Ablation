@@ -125,7 +125,7 @@ def train_model(model: Model, dataset_id, dataset_prefix, epochs=50, batch_size=
         y_test = y_test[:val_subset]
 
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, callbacks=callback_list,
-              class_weight=class_weight, verbose=0, validation_data=(X_test, y_test))
+              class_weight=class_weight, verbose=1, validation_data=(X_test, y_test))
 
 
 def evaluate_model(model: Model, dataset_id, dataset_prefix, batch_size=128, test_data_subset=None,
