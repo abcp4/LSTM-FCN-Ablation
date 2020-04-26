@@ -125,7 +125,8 @@ TRAIN_FILES = ['../data/Adiac_TRAIN',  # 0
                '../data/SemgHandSubjectCh2_TRAIN',  # 124
                '../data/ShakeGestureWiimoteZ_TRAIN',  # 125
                '../data/SmoothSubspace_TRAIN',  # 126
-               '../data/UMD_TRAIN'  # 127
+               '../data/UMD_TRAIN'  # 127,
+               '../data/GEO_TRAIN'  # 128,
                ]
 
 TEST_FILES = ['../data/Adiac_TEST',  # 0
@@ -256,6 +257,7 @@ TEST_FILES = ['../data/Adiac_TEST',  # 0
               '../data/ShakeGestureWiimoteZ_TEST',  # 125
               '../data/SmoothSubspace_TEST',  # 126
               '../data/UMD_TEST',  # 127
+              '../data/GEO_TEST',  # 128
               ]
 
 MAX_SEQUENCE_LENGTH_LIST = [176, # 0
@@ -386,6 +388,7 @@ MAX_SEQUENCE_LENGTH_LIST = [176, # 0
                             385, # 125
                             15, # 126
                             150, # 127
+                            876, # 128
                             ]
 
 NB_CLASSES_LIST = [37, # 0
@@ -516,4 +519,5 @@ NB_CLASSES_LIST = [37, # 0
                    10, # 125
                    3, # 126
                    3, # 127
+                   2, # 128
                    ]
